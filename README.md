@@ -14,6 +14,11 @@ Scene text detection based on ctpn (connectionist text proposal network). It is 
 # setup
 nms and bbox utils are written in cython, hence you have to build the library first.
 ```shell
+
+pip install -r requirements.txt (or pip3 install -r requirements.txt)
+
+# In case you have configured with python3 than update make.sh file to python3
+
 cd utils/bbox
 chmod +x make.sh
 ./make.sh
@@ -21,17 +26,55 @@ chmod +x make.sh
 It will generate a nms.so and a bbox.so in current folder.
 ***
 # demo
+- make sure you install tensorflow==1.15.0
 - follow setup to build the library 
 - download the ckpt file from [googl drive](https://drive.google.com/file/d/1HcZuB_MHqsKhKEKpfF1pEU85CYy4OlWO/view?usp=sharing) or [baidu yun](https://pan.baidu.com/s/1BNHt_9fiqRPGmEXPaxaFXw)
 - put checkpoints_mlt/ in text-detection-ctpn/
 - put your images in data/demo, the results will be saved in data/res, and run demo in the root 
 ```shell
-python ./main/demo.py
+python ./main/demo.py (or python3 ./main/demo.py )
 ```
+
+**To Execute demo file on Windows/CPU**
+
+Follow below steps:
+
+step 1: change "np.int_t " to "np.intp_t" in line 25 of the file utils\bbox\nms.pyx
+otherwise following error will appear " ValueError: Buffer dtype mismatch, expected 'int_t' but got 'long long' " in step 6.
+
+Open the x64 or x32 Visual Studio developer command prompt (or Native Tools Command Prompt) in Windows 10 
+
+step 2: cd text-detection-ctpn\utils\bbox
+```
+pip install cython
+cython bbox.pyx
+cython nms.pyx
+```
+
+step 3:create setup file as setup_new.py in utils\bbox\ folder with below code
+```
+import numpy as np
+from distutils.core import setup
+from Cython.Build import cythonize
+from distutils.extension import Extension
+numpy_include = np.get_include()
+setup(ext_modules=cythonize("bbox.pyx"),include_dirs=[numpy_include])
+setup(ext_modules=cythonize("nms.pyx"),include_dirs=[numpy_include])
+
+```
+
+step 4:build .pyd file by executing below command
+```
+python setup_new.py install
+```
+copy bbox.cp36-win_amd64.pyd and nms.cp36-win_amd64.pyd from build\lib.win-amd64-3.6\ folder to text-detection-ctpn\utils\bbox
+
+
+
 ***
 # training
 ## prepare data
-- First, download the pre-trained model of VGG net and put it in data/vgg_16.ckpt. you can download it from [tensorflow/models](https://github.com/tensorflow/models/tree/1af55e018eebce03fb61bba9959a04672536107d/research/slim)
+- First, download the pre-trained model of VGG16 and put it in data/vgg_16.ckpt. you can download it from [tensorflow/models](https://github.com/tensorflow/models/tree/1af55e018eebce03fb61bba9959a04672536107d/research/slim)
 - Second, download the dataset we prepared from [google drive](https://drive.google.com/file/d/1npxA_pcEvIa4c42rho1HgnfJ7tamThSy/view?usp=sharing) or [baidu yun](https://pan.baidu.com/s/1nbbCZwlHdgAI20_P9uw9LQ). put the downloaded data in data/dataset/mlt, then start the training.
 - Also, you can prepare your own dataset according to the following steps. 
 - Modify the DATA_FOLDER and OUTPUT in utils/prepare/split_label.py according to your dataset. And run split_label.py in the root
@@ -44,7 +87,8 @@ python ./utils/prepare/split_label.py
 
 ***
 ## train 
-Simplely run
+Simplely run, but before that modify path for DATA_FOLDER in in utils/dataset/data_provider.py
+And if you want to use current training checkpoints and built further on top of it, then update max_steps in main/train.py to higher number 
 ```shell
 python ./main/train.py
 ```

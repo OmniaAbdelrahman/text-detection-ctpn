@@ -8,8 +8,8 @@ from tqdm import tqdm
 sys.path.append(os.getcwd())
 from utils import orderConvex, shrink_poly
 
-DATA_FOLDER = "/media/D/DataSet/mlt_selected/"
-OUTPUT = "data/dataset/mlt/"
+DATA_FOLDER = "/home/amit/text_deduction/text-detection-ctpn/main/data/test_copy"
+OUTPUT = "/home/amit/text_deduction/text-detection-ctpn/main/data/test_split_copy"
 MAX_LEN = 1200
 MIN_LEN = 600
 
@@ -28,7 +28,7 @@ for im_fn in tqdm(im_fns):
         if ext.lower() not in ['.jpg', '.png']:
             continue
 
-        gt_path = os.path.join(DATA_FOLDER, "label", 'gt_' + bfn + '.txt')
+        gt_path = os.path.join(DATA_FOLDER, "label", "gt_" + bfn + '.txt')
         img_path = os.path.join(DATA_FOLDER, "image", im_fn)
 
         img = cv.imread(img_path)
@@ -49,6 +49,7 @@ for im_fn in tqdm(im_fns):
         re_size = re_im.shape
 
         polys = []
+        result_polys = []
         with open(gt_path, 'r') as f:
             lines = f.readlines()
         for line in lines:
@@ -59,37 +60,26 @@ for im_fn in tqdm(im_fns):
             poly[:, 1] = poly[:, 1] / img_size[0] * re_size[0]
             poly = orderConvex(poly)
             polys.append(poly)
-
             # cv.polylines(re_im, [poly.astype(np.int32).reshape((-1, 1, 2))], True,color=(0, 255, 0), thickness=2)
-
-        res_polys = []
-        for poly in polys:
-            # delete polys with width less than 10 pixel
-            if np.linalg.norm(poly[0] - poly[1]) < 10 or np.linalg.norm(poly[3] - poly[0]) < 10:
-                continue
-
-            res = shrink_poly(poly)
-            # for p in res:
-            #    cv.polylines(re_im, [p.astype(np.int32).reshape((-1, 1, 2))], True, color=(0, 255, 0), thickness=1)
-
-            res = res.reshape([-1, 4, 2])
-            for r in res:
-                x_min = np.min(r[:, 0])
-                y_min = np.min(r[:, 1])
-                x_max = np.max(r[:, 0])
-                y_max = np.max(r[:, 1])
-
-                res_polys.append([x_min, y_min, x_max, y_max])
+            result_poly =(str(poly.astype(np.int32).reshape((-1, 1, 2))[0])[2:-2] +" " +str(poly.astype(np.int32).reshape((-1, 1, 2))[1])[2:-2] +" " +str(poly.astype(np.int32).reshape((-1, 1, 2))[2])[2:-2]+" " +str(poly.astype(np.int32).reshape((-1, 1, 2))[3])[2:-2]).replace(" ", ",")
+            result_polys.append(result_poly)
+            # print(result_polys)
 
         cv.imwrite(os.path.join(OUTPUT, "image", fn), re_im)
-        with open(os.path.join(OUTPUT, "label", bfn) + ".txt", "w") as f:
-            for p in res_polys:
-                line = ",".join(str(p[i]) for i in range(4))
-                f.writelines(line + "\r\n")
-                # for p in res_polys:
-                #    cv.rectangle(re_im,(p[0],p[1]),(p[2],p[3]),color=(0,0,255),thickness=1)
 
-                # cv.imshow("demo",re_im)
-                # cv.waitKey(0)
+
+        def remove_prefix(text, prefix):
+            if text.startswith(prefix):
+                return text[len(prefix):]
+            return text
+
+        with open(os.path.join(OUTPUT, "label", bfn) + ".txt", "w") as f:
+            for p in result_polys:
+                p1= remove_prefix(p, ",")
+                p2 = p1.replace(",,", ",")
+                p3 = remove_prefix(p2, ",")
+                p4 = p3.replace(",,", ",")
+                f.writelines(p4 + "\r\n")
+
     except:
         print("Error processing {}".format(im_fn))
