@@ -9,7 +9,7 @@ sys.path.append(os.getcwd())
 from utils import orderConvex, shrink_poly
 
 DATA_FOLDER = "/content/text-detection-ctpn/data/mlt_selected/"
-OUTPUT = "data/dataset/mlt/"
+OUTPUT = "/content/text-detection-ctpn/data/mlt_splitted/"
 MAX_LEN = 1200
 MIN_LEN = 600
 
