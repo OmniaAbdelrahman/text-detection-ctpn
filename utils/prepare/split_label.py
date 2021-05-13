@@ -8,7 +8,7 @@ from tqdm import tqdm
 sys.path.append(os.getcwd())
 from utils import orderConvex, shrink_poly
 
-DATA_FOLDER = "/media/D/DataSet/mlt_selected/"
+DATA_FOLDER = "/content/text-detection-ctpn/data/mlt_selected/"
 OUTPUT = "data/dataset/mlt/"
 MAX_LEN = 1200
 MIN_LEN = 600
