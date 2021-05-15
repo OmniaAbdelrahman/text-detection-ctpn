@@ -20,7 +20,7 @@ tf.app.flags.DEFINE_string('gpu', '0', '')
 tf.app.flags.DEFINE_string('checkpoint_path', '/content/checkpoints_mlt/', '')
 tf.app.flags.DEFINE_string('logs_path', 'logs_mlt/', '')
 tf.app.flags.DEFINE_string('pretrained_model_path', '/content/text-detection-ctpn/data/vgg_16.ckpt', '')
-tf.app.flags.DEFINE_boolean('restore', True, '')
+tf.app.flags.DEFINE_boolean('restore', False, '')
 tf.app.flags.DEFINE_integer('save_checkpoint_steps', 2000, '')
 FLAGS = tf.app.flags.FLAGS
 
